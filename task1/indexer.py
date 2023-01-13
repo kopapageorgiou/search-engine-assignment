@@ -8,8 +8,9 @@ import string
 import pandas as pd
 import numpy as np
 import time
+import ast
 
-newgroups_train = pd.read_csv("dataProcessed.csv")
+newgroups_train = pd.read_csv("dataProcessed.csv",converters={'wordCount':ast.literal_eval})
 def text_preprocess(text):
     nltk_english_stopwords = stopwords.words('english')
     tran = str.maketrans('','', string.punctuation)
@@ -40,14 +41,23 @@ tfidf, docvectors = retrieve_vectors(newgroups_train)
 
 def generate_inverted_index(data):
     inv_idx_dict = {}
-    for index, doc_text in zip(data['index'], data['text']):
+    term_count = {}
+    for index, doc_text,word_count in zip(data['index'], data['text'], data['wordCount']):
+        #print(word_count)
         for word in doc_text.split():
             #print(word)
             if word not in inv_idx_dict.keys():
                 inv_idx_dict[word] = [index]
-            elif index not in inv_idx_dict[word]:
+                term_count[word] = word_count[word]
+            elif word in inv_idx_dict.keys():
                 inv_idx_dict[word].append(index)
-    return inv_idx_dict
+                term_count[word]+= word_count[word]
+            """elif index not in inv_idx_dict[word]:
+                inv_idx_dict[word].append(index)
+                term_count[word] += 1"""
+
+            #if word not in inv_idx_dict.keys():
+    return inv_idx_dict, term_count
 
 def find_similarity(u, v):
     return np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v))
@@ -123,8 +133,8 @@ def plot_results(data_sizes, run_times, comparisons):
         
 data_sizes = list(range(10, 101, 10))
 #ii_run_times_1, ii_comparisons_1, pairwise_similarity = run_inverted_index_test(data_sizes, newgroups_train, docvectors)
-res = generate_inverted_index(newgroups_train)
-pprint(res)
+res, term_count = generate_inverted_index(newgroups_train)
+#pprint(res)
 """ii_run_times_1_df = pd.DataFrame(ii_comparisons_1)
 ii_run_times_1_df.to_csv('ii_run_times_1.csv')
 ii_comparisons_1_df = pd.DataFrame(ii_comparisons_1)
@@ -133,6 +143,15 @@ pairwise_similarity_df = pd.DataFrame(pairwise_similarity)
 pairwise_similarity_df.to_csv('results.csv')
 plt = plot_results(data_sizes, ii_run_times_1, ii_comparisons_1)
 plt.show()"""
+
+data = {'term': list(res.keys()),
+        'indexes': res.values(),
+        'termsCount': term_count.values()
+}
+df = pd.DataFrame(data)
+
+df.to_csv("ivertedIndexes.csv", index=False)
+
 #print(newgroups_train.filenames.shape)
 #print(newgroups_train.data)
 

@@ -29,15 +29,25 @@ files = glob.glob(PATH + '/**/*', recursive=True)
 text = ""
 indexes = []
 texts = []
+terms = []
 for file in files:
     if os.path.isfile(file):
         with open(file,"r", encoding='latin-1') as fp:
             text = fp.read()
+            textReformed = text_preprocess(text)
+            wordCount = {}
+            for word in textReformed.split():
+                if word in wordCount.keys():
+                    wordCount[word] += 1
+                else:
+                    wordCount[word] = 1
             indexes.append(int(os.path.basename(file)))
-            texts.append(text_preprocess(text))
+            texts.append(textReformed)
+            terms.append(wordCount)
 
 data = {'index': indexes,
-        'text': texts
+        'text': texts,
+        'wordCount': terms
 }
 df = pd.DataFrame(data)
 
