@@ -25,7 +25,7 @@ def text_preprocess(text):
 
 data = {}
 files = glob.glob(PATH + '/**/*', recursive=True)
-#print(files)
+
 text = ""
 indexes = []
 texts = []
