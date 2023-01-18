@@ -9,7 +9,7 @@ def getIDF(df : int):
 def getTFIDF(idf, tf):
     return idf * tf
 
-inverted_indexes = pd.read_csv("ivertedIndexes.csv", converters={'indexes':ast.literal_eval})
+inverted_indexes = pd.read_csv("invertedIndexes.csv", converters={'indexes':ast.literal_eval})
 
 while True:
     x = input("Enter term: ")
